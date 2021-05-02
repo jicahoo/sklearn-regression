@@ -6,6 +6,9 @@ from sklearn.metrics import r2_score
 from sklearn import linear_model
 
 # https://en.wikipedia.org/wiki/Coefficient_of_determination
+# https://www.solarwinds.com/storage-resource-monitor/use-cases/storage-capacity-planning
+# https://www.manageengine.com/network-monitoring/storage-capacity-forecasting-planning.html
+# https://cloud.netapp.com/blog/when-to-buy-new-storage-predict-your-future-data-use
 
 def get_fit(sample_days, full_percent, display_plot = False):
     start_day = -10
