@@ -1,27 +1,39 @@
-from datetime import date
-from typing import List
+import numpy as np
 import pandas as pd
 import sys
 import csv
 import matplotlib.pyplot as plt
 from sklearn import linear_model
 from sklearn.metrics import r2_score
-
-
-class DateAndFullPercent(object):
-    def __int__(self, collect_date: date, full_percent:int):
-        self.collect_date = collect_date
-        self.full_percent = full_percent
+from sqlalchemy import create_engine
 
 
 class PieceLinearReg(object):
-    def __init__(self, train_data: List[DateAndFullPercent]):
-        self.train_data = train_data
+    def __init__(self):
+        self.train_data = None
         self.model = None
+        self.r_2 = None
+        self.start_day = None
 
     @staticmethod
-    def load_csv(csv_path):
+    def from_csv(csv_path):
+        p = PieceLinearReg()
+        p.train_data = PieceLinearReg._load_csv_file(csv_path)
+        return p
+
+    @staticmethod
+    def from_postgres(postgres_url, table_name):
+        p = PieceLinearReg()
+        p.train_data = PieceLinearReg._load_postgres_table(postgres_url, table_name)
+        return p
+
+    @staticmethod
+    def _load_csv_file(csv_path):
         df = pd.read_csv(csv_path, sep=',')
+        return PieceLinearReg._refine_df(df)
+
+    @staticmethod
+    def _refine_df(df):
         df['Day'] = pd.to_datetime(df['Day'])
         last_day = df.at[df.shape[0] - 1, 'Day']
         def m(day):
@@ -31,11 +43,17 @@ class PieceLinearReg(object):
         return df
 
     @staticmethod
-    def convert_to_numpy_types(train_data: List[DateAndFullPercent]):
-        pass
+    def _load_postgres_table(postgres_url, table_name):
+        engine = create_engine(postgres_url)
+        df = pd.read_sql_table(table_name, engine)
+        df = df.drop('index', 1)
+        return PieceLinearReg._refine_df(df)
 
-    @staticmethod
-    def get_fit(sample_days, full_percent, display_plot=False):
+    def fit(self, display_plot=False):
+        vals = self.train_data.values
+        days = vals[:, 0]
+        sample_days = np.reshape(days, (-1, 1))
+        full_percent = vals[:, 1]
         start_day = -10
         if display_plot is True:
             plt.scatter(sample_days, full_percent, color='red')
@@ -60,16 +78,42 @@ class PieceLinearReg(object):
                 max_preds = preds
                 max_reg_model = regr
         if display_plot is True:
-            plt.plot(max_x, max_preds, color='green', linewidth=3)
+            plt.plot(max_x, max_preds, color='purple', linewidth=3)
             plt.show()
-        return max_reg_model
-
-    def train(self):
-        sample_days, full_percent = PieceLinearReg.convert_to_numpy_types(self.train_data)
-        self.model = PieceLinearReg.get_fit(sample_days, full_percent)
+        self.model = max_reg_model
+        self.r_2 = max_r2
+        self.start_day = max_idx
         return self.model
 
 
+def test_postgres():
+    DATABASES = {
+        'sklearn': {
+            'NAME': 'sklearn',
+            'USER': 'sklearn',
+            'PASSWORD': 'sklearn',
+            'HOST': 'localhost',
+            'PORT': 5432,
+        },
+    }
+    # choose the database to use
+    db = DATABASES['sklearn']
+    engine_string = "postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}".format(
+        user=db['USER'],
+        password=db['PASSWORD'],
+        host=db['HOST'],
+        port=db['PORT'],
+        database=db['NAME'],
+    )
+    p = PieceLinearReg.from_postgres(engine_string, 'date_percent')
+    p.fit(True)
+    print(p.model)
+
+
+def test_csv():
+    r = PieceLinearReg.from_csv('../date_percent.csv')
+    r.fit(True)
+    print(r.model)
+
 if __name__ == '__main__':
-    r = PieceLinearReg.load_csv('../date_percent.csv')
-    print(r)
+    test_postgres()
