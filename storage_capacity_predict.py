@@ -10,6 +10,7 @@ from sklearn import linear_model
 # https://www.manageengine.com/network-monitoring/storage-capacity-forecasting-planning.html
 # https://cloud.netapp.com/blog/when-to-buy-new-storage-predict-your-future-data-use
 
+
 def get_fit(sample_days, full_percent, display_plot = False):
     start_day = -10
     if display_plot is True:
@@ -18,6 +19,9 @@ def get_fit(sample_days, full_percent, display_plot = False):
     earliest_day = -100
     max_r2 = -sys.maxsize - 1
     max_idx = None
+    max_x = None
+    max_preds = None
+    max_reg_model = None
     for i in range(start_day, earliest_day, -1):
         x = sample_days[i:]
         y = full_percent[i:]
