@@ -116,4 +116,4 @@ def test_csv():
     print(r.model)
 
 if __name__ == '__main__':
-    test_postgres()
+    test_csv()
