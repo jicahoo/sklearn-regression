@@ -9,10 +9,19 @@ from sqlalchemy import create_engine
 
 class PieceLinearReg(object):
     def __init__(self):
+        '''
+        train_data: pandas DataFrame(Date, FullPercent)
+        model: the final Linear Function output.
+        r_2: https://en.wikipedia.org/wiki/Coefficient_of_determination
+        start_day_of_best_fit: the start day to get the best linear model. The best model means the model with hightest
+                                self.r_2
+        min_days: the least days we need to include to train our model.
+        '''
         self.train_data = None
         self.model = None
         self.r_2 = None
-        self.start_day = None
+        self.start_day_of_best_fit = None
+        self.min_days = 10
 
     @staticmethod
     def from_csv(csv_path):
@@ -104,20 +113,20 @@ class PieceLinearReg(object):
         days = vals[:, 0]
         sample_days = np.reshape(days, (-1, 1))
         full_percent = vals[:, 1]
-        start_day = -10
+        base_day = 0 - self.min_days
         if display_plot is True:
             plt.scatter(sample_days, full_percent, color='red')
         # Train the model using the training sets
         earliest_day = -100
         max_idx, max_preds, max_r2, max_reg_model, max_x = PieceLinearReg.get_best_subset_for_linear_regression(
-                                                                earliest_day, start_day,
+                                                                earliest_day, base_day,
                                                                 full_percent, sample_days)
         if display_plot is True:
-            plt.plot(max_x, max_preds, color='blue', linewidth=3)
+            plt.plot(max_x, max_preds, color='purple', linewidth=3)
             plt.show()
         self.model = max_reg_model
         self.r_2 = max_r2
-        self.start_day = max_idx
+        self.start_day_of_best_fit = max_idx
         return self.model
 
     @staticmethod
@@ -141,3 +150,6 @@ class PieceLinearReg(object):
                 max_preds = preds
                 max_reg_model = regr
         return max_idx, max_preds, max_r2, max_reg_model, max_x
+
+    def __str__(self):
+        fmt_str = "start_day_of_best_fit: {}, R^2: {}".format(self.start_day_of_best_fit, self.r_2)
