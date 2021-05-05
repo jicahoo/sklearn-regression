@@ -16,3 +16,5 @@
 * PieceLinearReg can suport two kinds of datasource
     * One is csv file via PieceLinearReg.from_csv method
     * One is PostgreSQL via PieceLinearReg.from_postgre method.
+# Plot exmaple:
+![image](https://user-images.githubusercontent.com/4143339/117114075-f40f4e00-adbd-11eb-8357-7788e714231c.png)
