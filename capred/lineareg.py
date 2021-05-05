@@ -29,10 +29,61 @@ class PieceLinearReg(object):
     @staticmethod
     def _load_csv_file(csv_path):
         df = pd.read_csv(csv_path, sep=',')
-        return PieceLinearReg._refine_df(df)
+        return PieceLinearReg._convert_data(df)
 
     @staticmethod
-    def _refine_df(df):
+    def _convert_data(df):
+        '''
+        Convert date to relative date format. e.g.   
+        From:
+            +----------+-------------+
+            |   DAY    | PERCENTFULL |
+            +----------+-------------+
+            |          |             |
+            | 1/1/2021 | 16          |
+            |          |             |
+            | 1/2/2021 | 13          |
+            |          |             |
+            | 1/3/2021 | 22          |
+            |          |             |
+            | 1/4/2021 | 25          |
+            |          |             |
+            | 1/5/2021 | 18          |
+            |          |             |
+            | 1/6/2021 | 15          |
+            |          |             |
+            | 1/7/2021 | 26          |
+            |          |             |
+            | 1/8/2021 | 27          |
+            |          |             |
+            | 1/9/2021 | 20          |
+            +----------+-------------+
+        To:
+            +-----+-------------+
+            | DAY | PERCENTFULL |
+            +-----+-------------+
+            |     |             |
+            | -8  | 16          |
+            |     |             |
+            | -7  | 13          |
+            |     |             |
+            | -6  | 22          |
+            |     |             |
+            | -5  | 25          |
+            |     |             |
+            | -4  | 18          |
+            |     |             |
+            | -3  | 15          |
+            |     |             |
+            | -2  | 26          |
+            |     |             |
+            | -1  | 27          |
+            |     |             |
+            | 0   | 20          |
+            +-----+-------------+
+        :param df:  pandas DataFrame with columen: Date and FullPercent
+        :return: 
+        '''
         df['Day'] = pd.to_datetime(df['Day'])
         last_day = df.at[df.shape[0] - 1, 'Day']
         def m(day):
@@ -46,7 +97,7 @@ class PieceLinearReg(object):
         engine = create_engine(postgres_url)
         df = pd.read_sql_table(table_name, engine)
         df = df.drop('index', 1)
-        return PieceLinearReg._refine_df(df)
+        return PieceLinearReg._convert_data(df)
 
     def fit(self, display_plot=False):
         vals = self.train_data.values
@@ -58,6 +109,19 @@ class PieceLinearReg(object):
             plt.scatter(sample_days, full_percent, color='red')
         # Train the model using the training sets
         earliest_day = -100
+        max_idx, max_preds, max_r2, max_reg_model, max_x = PieceLinearReg.get_best_subset_for_linear_regression(
+                                                                earliest_day, start_day,
+                                                                full_percent, sample_days)
+        if display_plot is True:
+            plt.plot(max_x, max_preds, color='blue', linewidth=3)
+            plt.show()
+        self.model = max_reg_model
+        self.r_2 = max_r2
+        self.start_day = max_idx
+        return self.model
+
+    @staticmethod
+    def get_best_subset_for_linear_regression(earliest_day, start_day, full_percent, sample_days):
         max_r2 = -sys.maxsize - 1
         max_idx = None
         max_x = None
@@ -76,10 +140,4 @@ class PieceLinearReg(object):
                 max_x = x
                 max_preds = preds
                 max_reg_model = regr
-        if display_plot is True:
-            plt.plot(max_x, max_preds, color='purple', linewidth=3)
-            plt.show()
-        self.model = max_reg_model
-        self.r_2 = max_r2
-        self.start_day = max_idx
-        return self.model
+        return max_idx, max_preds, max_r2, max_reg_model, max_x
