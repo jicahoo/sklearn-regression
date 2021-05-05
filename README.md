@@ -1,5 +1,8 @@
 # sklearn-regression
 
+# Introduction
+* It a simple demo program to use LinearRegression to do the task of predicting the storage usage trend.
+
 # How to run and main logic
 * prepare **python3** environment
 * pip install -i requirements.txt
