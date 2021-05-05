@@ -18,7 +18,7 @@ class PieceLinearReg(object):
         min_days: the least days we need to include to train our model.
         '''
         self.train_data = None
-        self.model = None
+        self.best_model = None
         self.r_2 = None
         self.start_day_of_best_fit = None
         self.min_days = 10
@@ -118,24 +118,25 @@ class PieceLinearReg(object):
             plt.scatter(sample_days, full_percent, color='red')
         # Train the model using the training sets
         earliest_day = -100
-        max_idx, max_preds, max_r2, max_reg_model, max_x = PieceLinearReg.get_best_subset_for_linear_regression(
+        best_day_left_most, best_preds, max_r2, \
+            best_model, best_days_subset = PieceLinearReg.get_best_subset_linear_fit(
                                                                 earliest_day, base_day,
                                                                 full_percent, sample_days)
         if display_plot is True:
-            plt.plot(max_x, max_preds, color='blue', linewidth=3)
+            plt.plot(best_days_subset, best_preds, color='green', linewidth=3)
             plt.show()
-        self.model = max_reg_model
+        self.best_model = best_model
         self.r_2 = max_r2
-        self.start_day_of_best_fit = max_idx
-        return self.model
+        self.start_day_of_best_fit = best_day_left_most
+        return self.best_model
 
     @staticmethod
-    def get_best_subset_for_linear_regression(earliest_day, start_day, full_percent, sample_days):
+    def get_best_subset_linear_fit(earliest_day, start_day, full_percent, sample_days):
         max_r2 = -sys.maxsize - 1
-        max_idx = None
-        max_x = None
-        max_preds = None
-        max_reg_model = None
+        day_left_most = None
+        days_subset = None
+        full_percent_preds = None
+        best_reg_model = None
         for i in range(start_day, earliest_day, -1):
             x = sample_days[i:]
             y = full_percent[i:]
@@ -145,11 +146,11 @@ class PieceLinearReg(object):
             r2 = r2_score(y, preds)
             if r2 > max_r2:
                 max_r2 = r2
-                max_idx = i
-                max_x = x
-                max_preds = preds
-                max_reg_model = regr
-        return max_idx, max_preds, max_r2, max_reg_model, max_x
+                day_left_most = i
+                days_subset = x
+                full_percent_preds = preds
+                best_reg_model = regr
+        return day_left_most, full_percent_preds, max_r2, best_reg_model, days_subset
 
     def __str__(self):
         fmt_str = \
@@ -157,8 +158,8 @@ class PieceLinearReg(object):
             "start_day_of_best_fit : {}, \n" \
             "R^2                   : {:.2f},\n" \
             .format(
-                    self.model.coef_[0],
-                    self.model.intercept_,
+                    self.best_model.coef_[0],
+                    self.best_model.intercept_,
                     self.start_day_of_best_fit,
                     self.r_2
             )

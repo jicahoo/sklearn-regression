@@ -21,7 +21,7 @@ def test_postgres():
     )
     p = PieceLinearReg.from_postgres(engine_string, 'date_percent')
     p.fit(True)
-    print(p.model)
+    print(p.best_model)
 
 if __name__ == '__main__':
     r = PieceLinearReg.from_csv('sample_data/date_percent.csv')
