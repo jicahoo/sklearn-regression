@@ -25,5 +25,5 @@ def test_postgres():
 
 if __name__ == '__main__':
     r = PieceLinearReg.from_csv('sample_data/date_percent.csv')
-    r.fit(True)
+    r.fit(display_plot=True)
     print(r)

@@ -131,13 +131,13 @@ class PieceLinearReg(object):
         return self.best_model
 
     @staticmethod
-    def get_best_subset_linear_fit(earliest_day, start_day, full_percent, sample_days):
+    def get_best_subset_linear_fit(earliest_day, base_day, full_percent, sample_days):
         max_r2 = -sys.maxsize - 1
         day_left_most = None
         days_subset = None
         full_percent_preds = None
         best_reg_model = None
-        for i in range(start_day, earliest_day, -1):
+        for i in range(base_day, earliest_day, -1):
             x = sample_days[i:]
             y = full_percent[i:]
             regr = linear_model.LinearRegression()
@@ -154,9 +154,9 @@ class PieceLinearReg(object):
 
     def __str__(self):
         fmt_str = \
-            "Learned Formula       : y = {:.2f}*x + {:.2f}\n"\
-            "start_day_of_best_fit : {}, \n" \
-            "R^2                   : {:.2f},\n" \
+            "Learned Formula          : y = {:.2f}*x + {:.2f}\n"\
+            "Earliest day of best fit : {}, \n" \
+            "R^2                      : {:.2f},\n" \
             .format(
                     self.best_model.coef_[0],
                     self.best_model.intercept_,
