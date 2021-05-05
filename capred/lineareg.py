@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import sys
-import csv
 import matplotlib.pyplot as plt
 from sklearn import linear_model
 from sklearn.metrics import r2_score
@@ -84,36 +83,3 @@ class PieceLinearReg(object):
         self.r_2 = max_r2
         self.start_day = max_idx
         return self.model
-
-
-def test_postgres():
-    DATABASES = {
-        'sklearn': {
-            'NAME': 'sklearn',
-            'USER': 'sklearn',
-            'PASSWORD': 'sklearn',
-            'HOST': 'localhost',
-            'PORT': 5432,
-        },
-    }
-    # choose the database to use
-    db = DATABASES['sklearn']
-    engine_string = "postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}".format(
-        user=db['USER'],
-        password=db['PASSWORD'],
-        host=db['HOST'],
-        port=db['PORT'],
-        database=db['NAME'],
-    )
-    p = PieceLinearReg.from_postgres(engine_string, 'date_percent')
-    p.fit(True)
-    print(p.model)
-
-
-def test_csv():
-    r = PieceLinearReg.from_csv('../date_percent.csv')
-    r.fit(True)
-    print(r.model)
-
-if __name__ == '__main__':
-    test_csv()
