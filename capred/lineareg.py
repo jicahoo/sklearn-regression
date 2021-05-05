@@ -30,15 +30,23 @@ class PieceLinearReg(object):
         return p
 
     @staticmethod
+    def _load_csv_file(csv_path):
+        df = pd.read_csv(csv_path, sep=',')
+        return PieceLinearReg._convert_data(df)
+
+    @staticmethod
     def from_postgres(postgres_url, table_name):
         p = PieceLinearReg()
         p.train_data = PieceLinearReg._load_postgres_table(postgres_url, table_name)
         return p
 
     @staticmethod
-    def _load_csv_file(csv_path):
-        df = pd.read_csv(csv_path, sep=',')
+    def _load_postgres_table(postgres_url, table_name):
+        engine = create_engine(postgres_url)
+        query_sql = """select "Day","PercentFull" from date_percent LIMIT 100"""
+        df = pd.read_sql_query(query_sql, engine)
         return PieceLinearReg._convert_data(df)
+
 
     @staticmethod
     def _convert_data(df):
@@ -101,12 +109,6 @@ class PieceLinearReg(object):
         df['Day'] = df['Day'].map(m)
         return df
 
-    @staticmethod
-    def _load_postgres_table(postgres_url, table_name):
-        engine = create_engine(postgres_url)
-        df = pd.read_sql_table(table_name, engine)
-        df = df.drop('index', 1)
-        return PieceLinearReg._convert_data(df)
 
     def fit(self, display_plot=False):
         vals = self.train_data.values
@@ -123,7 +125,7 @@ class PieceLinearReg(object):
                                                                 earliest_day, base_day,
                                                                 full_percent, sample_days)
         if display_plot is True:
-            plt.plot(best_days_subset, best_preds, color='green', linewidth=3)
+            plt.plot(best_days_subset, best_preds, color='blue', linewidth=3)
             plt.show()
         self.best_model = best_model
         self.r_2 = max_r2

@@ -1,4 +1,7 @@
+from sqlalchemy import create_engine
+
 from capred.lineareg import PieceLinearReg
+
 
 def test_postgres():
     DATABASES = {
@@ -21,9 +24,14 @@ def test_postgres():
     )
     p = PieceLinearReg.from_postgres(engine_string, 'date_percent')
     p.fit(True)
-    print(p.best_model)
+    print(p)
 
-if __name__ == '__main__':
+
+def test_csv():
     r = PieceLinearReg.from_csv('sample_data/date_percent.csv')
     r.fit(display_plot=True)
     print(r)
+
+
+if __name__ == '__main__':
+    test_csv()
