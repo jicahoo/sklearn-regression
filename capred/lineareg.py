@@ -122,7 +122,7 @@ class PieceLinearReg(object):
                                                                 earliest_day, base_day,
                                                                 full_percent, sample_days)
         if display_plot is True:
-            plt.plot(max_x, max_preds, color='purple', linewidth=3)
+            plt.plot(max_x, max_preds, color='blue', linewidth=3)
             plt.show()
         self.model = max_reg_model
         self.r_2 = max_r2
@@ -152,4 +152,14 @@ class PieceLinearReg(object):
         return max_idx, max_preds, max_r2, max_reg_model, max_x
 
     def __str__(self):
-        fmt_str = "start_day_of_best_fit: {}, R^2: {}".format(self.start_day_of_best_fit, self.r_2)
+        fmt_str = \
+            "Learned Formula       : y = {:.2f}*x + {:.2f}\n"\
+            "start_day_of_best_fit : {}, \n" \
+            "R^2                   : {:.2f},\n" \
+            .format(
+                    self.model.coef_[0],
+                    self.model.intercept_,
+                    self.start_day_of_best_fit,
+                    self.r_2
+            )
+        return fmt_str

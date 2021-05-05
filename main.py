@@ -23,11 +23,7 @@ def test_postgres():
     p.fit(True)
     print(p.model)
 
-
-def test_csv():
+if __name__ == '__main__':
     r = PieceLinearReg.from_csv('sample_data/date_percent.csv')
     r.fit(True)
-    print(r.model)
-
-if __name__ == '__main__':
-    test_csv()
+    print(r)
