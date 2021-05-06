@@ -17,4 +17,5 @@
     * One is csv file via PieceLinearReg.from_csv method
     * One is PostgreSQL via PieceLinearReg.from_postgre method.
 # Plot exmaple:
-![image](https://user-images.githubusercontent.com/4143339/117114075-f40f4e00-adbd-11eb-8357-7788e714231c.png)
+![image](https://user-images.githubusercontent.com/4143339/117252180-3006e980-ae78-11eb-8bae-8d7dd73caa7c.png)
+
