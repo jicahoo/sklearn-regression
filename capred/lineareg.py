@@ -126,6 +126,9 @@ class PieceLinearReg(object):
                                                                 full_percent, sample_days)
         if display_plot is True:
             plt.plot(best_days_subset, best_preds, color='blue', linewidth=3)
+            plt.title('Storage Capacity Forecast')
+            plt.xlabel('Days')
+            plt.ylabel('Used Capacity Percentage')
             plt.show()
         self.best_model = best_model
         self.r_2 = max_r2
